@@ -85,11 +85,14 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`\n🎬 CineMatch Backend running on http://localhost:${PORT}`);
-  console.log(`   Data source: ${dataSource()}`);
-  console.log(`   TMDB API Key: ${isTmdbConfigured() ? 'configured' : 'missing — using local catalog. Add TMDB_API_KEY in backend/.env for live posters.'}`);
-  console.log(`   Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}\n`);
-});
+// ── Start server only in direct execution (not in serverless/Vercel) ──
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`\n🎬 CineMatch Backend running on http://localhost:${PORT}`);
+    console.log(`   Data source: ${dataSource()}`);
+    console.log(`   TMDB API Key: ${isTmdbConfigured() ? 'configured' : 'missing — using local catalog. Add TMDB_API_KEY in backend/.env for live posters.'}`);
+    console.log(`   Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}\n`);
+  });
+}
 
 export default app;
