@@ -141,18 +141,23 @@ export async function fetchGenres(): Promise<Genre[]> {
   }
 }
 
-// ── Recommendations (AI Engine with instant intelligent fallback) ──
+// ── Recommendations (Gemini LLM + TMDB Hydration with instant TF-IDF fallback) ──
 export async function fetchRecommendations(
   query: string,
   limit = 10
 ): Promise<{ results: RecommendationResult[]; source: string; note?: string }> {
   try {
-    const { data } = await api.post('/recommendations', { query, limit });
-    if (data.results && data.results.length > 0) {
-      return { results: data.results, source: data.source ?? 'ai', note: data.note };
+    const { askGemini } = await import('./gemini');
+    const { results, explanationSummary } = await askGemini(query);
+    if (results && results.length > 0) {
+      return {
+        results: results.slice(0, limit),
+        source: 'gemini_ai',
+        note: explanationSummary,
+      };
     }
-  } catch {
-    // If backend / Python AI service is unreachable, run high-precision in-client TF-IDF recommender
+  } catch (err) {
+    console.warn('Gemini inference error, falling back:', err);
   }
 
   const localResults = recommendLocal(query, limit);
