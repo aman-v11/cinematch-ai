@@ -389,28 +389,30 @@ export default function AIRecommendationsPage() {
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
             borderTop: '1px solid var(--border)',
-            padding: '16px 20px',
-            paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))',
+            padding: '12px 16px',
+            paddingBottom: 'calc(65px + env(safe-area-inset-bottom, 0px))',
             zIndex: 40,
           }}
+          className="ai-input-bar"
         >
-          <div style={{ maxWidth: 960, margin: '0 auto', display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+          <div style={{ maxWidth: 960, margin: '0 auto', display: 'flex', gap: 8, alignItems: 'flex-end' }}>
             <textarea
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Describe what you want to watch… (e.g. 'A dark psychological thriller in space' - Press Enter)"
+              placeholder="Describe what you want to watch… (e.g. 'A psychological thriller in space')"
               rows={1}
               className="input"
               style={{
                 flex: 1,
                 resize: 'none',
-                minHeight: 46,
-                maxHeight: 120,
+                minHeight: 44,
+                maxHeight: 100,
                 fontFamily: 'inherit',
-                lineHeight: 1.5,
-                borderRadius: 14,
+                fontSize: 14,
+                lineHeight: 1.4,
+                borderRadius: 12,
               }}
               id="ai-query-input"
             />
@@ -418,7 +420,7 @@ export default function AIRecommendationsPage() {
               className="btn btn-primary"
               onClick={() => handleSubmit()}
               disabled={!query.trim() || mutation.isPending}
-              style={{ height: 46, width: 48, flexShrink: 0, borderRadius: 14, padding: 0 }}
+              style={{ height: 44, width: 44, flexShrink: 0, borderRadius: 12, padding: 0 }}
               id="ai-send-btn"
               aria-label="Send query"
             >
@@ -430,6 +432,13 @@ export default function AIRecommendationsPage() {
             </button>
           </div>
         </div>
+        <style>{`
+          @media (min-width: 641px) {
+            .ai-input-bar {
+              padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+            }
+          }
+        `}</style>
       </div>
     </PageTransition>
   );
