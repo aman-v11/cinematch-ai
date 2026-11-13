@@ -112,22 +112,42 @@ export async function discoverLiveMovies(params: {
   type?: string;
   page?: number;
 }): Promise<{ movies: Movie[]; totalPages: number }> {
+  const isAll = !params.type || params.type === 'all';
   const isTv = params.type === 'tv';
-  const endpoint = isTv ? '/discover/tv' : '/discover/movie';
 
-  const queryParams: Record<string, any> = {
-    page: params.page || 1,
-    with_genres: params.genres,
-    'vote_average.gte': params.minRating,
-    sort_by: params.sortBy || 'popularity.desc',
+  const buildQueryParams = (tv: boolean): Record<string, any> => {
+    const qp: Record<string, any> = {
+      page: params.page || 1,
+      with_genres: params.genres || undefined,
+      sort_by: params.sortBy || 'popularity.desc',
+    };
+    if (params.minRating) qp['vote_average.gte'] = params.minRating;
+    if (params.year) {
+      if (tv) qp.first_air_date_year = params.year;
+      else qp.primary_release_year = params.year;
+    }
+    return qp;
   };
 
-  if (params.year) {
-    if (isTv) queryParams.first_air_date_year = params.year;
-    else queryParams.primary_release_year = params.year;
+  // When "All Titles" selected, merge movie + tv results sorted by popularity
+  if (isAll) {
+    const [movieRes, tvRes] = await Promise.all([
+      tmdbClient.get('/discover/movie', { params: buildQueryParams(false) }),
+      tmdbClient.get('/discover/tv', { params: buildQueryParams(true) }),
+    ]);
+    const movies = (movieRes.data.results || []).map((m: any) => mapMovie(m, 'movie'));
+    const tvShows = (tvRes.data.results || []).map((m: any) => mapMovie(m, 'tv'));
+    // Interleave and sort by popularity descending
+    const combined = [...movies, ...tvShows].sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0));
+    const totalPages = Math.min(
+      Math.max(movieRes.data.total_pages || 1, tvRes.data.total_pages || 1),
+      50,
+    );
+    return { movies: combined, totalPages };
   }
 
-  const { data } = await tmdbClient.get(endpoint, { params: queryParams });
+  const endpoint = isTv ? '/discover/tv' : '/discover/movie';
+  const { data } = await tmdbClient.get(endpoint, { params: buildQueryParams(isTv) });
   return {
     movies: (data.results || []).map((m: any) => mapMovie(m, isTv ? 'tv' : 'movie')),
     totalPages: Math.min(data.total_pages || 1, 50),

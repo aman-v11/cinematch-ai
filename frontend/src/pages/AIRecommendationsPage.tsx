@@ -84,13 +84,17 @@ export default function AIRecommendationsPage() {
     },
   });
 
-  // Auto-fill from URL param if query param exists
+  // Auto-fill from URL param if query param exists — fire the mutation directly
+  // so we don't depend on a stale handleSubmit closure
   useEffect(() => {
-    const q = searchParams.get('q');
-    if (q) {
-      handleSubmit(q);
+    const q = searchParams.get('q')?.trim();
+    if (q && !mutation.isPending) {
+      setMessages((prev) => [...prev, { role: 'user', content: q }]);
+      mutation.mutate(q);
     }
-  }, [searchParams]);
+    // Only run once on mount (or if the URL param changes)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
