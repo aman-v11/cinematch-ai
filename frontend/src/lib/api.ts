@@ -1,6 +1,14 @@
 import axios from 'axios';
 import type { Movie, MovieDetail, Genre, RecommendationResult } from '../types/movie';
 import { recommendLocal, similarLocal } from './recommender';
+import {
+  fetchLiveMovies,
+  fetchLiveTrending,
+  searchLiveMovies,
+  discoverLiveMovies,
+  fetchLiveMovieDetail,
+  fetchLiveGenres,
+} from './tmdbLive';
 
 const api = axios.create({
   baseURL: '/api',
@@ -8,63 +16,79 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// ── Movies ────────────────────────────────────────────────────────
+// ── Movies (Live TMDB with local fallback) ─────────────────────────
 export async function fetchMovies(category = 'popular', page = 1): Promise<{ movies: Movie[]; totalPages: number }> {
   try {
-    const { data } = await api.get('/movies', { params: { category, page } });
-    return { movies: data.movies ?? [], totalPages: data.totalPages ?? 1 };
+    return await fetchLiveMovies(category as any, page);
   } catch {
-    const res = recommendLocal('', 20);
-    return { movies: res, totalPages: 1 };
+    try {
+      const { data } = await api.get('/movies', { params: { category, page } });
+      return { movies: data.movies ?? [], totalPages: data.totalPages ?? 1 };
+    } catch {
+      const res = recommendLocal('', 20);
+      return { movies: res, totalPages: 1 };
+    }
   }
 }
 
-export async function fetchMovieDetail(id: number): Promise<MovieDetail> {
+export async function fetchMovieDetail(id: number, mediaType?: 'movie' | 'tv'): Promise<MovieDetail> {
   try {
-    const { data } = await api.get(`/movies/${id}`);
-    return data.movie;
+    return await fetchLiveMovieDetail(id, mediaType || 'movie');
   } catch {
-    const matches = similarLocal(id, 8);
-    const found = matches[0] || (await fetchMovies()).movies[0];
-    return {
-      ...found,
-      status: 'Released',
-      director: (found as any).director ?? null,
-      cast: [],
-      similar: matches,
-    };
+    try {
+      const { data } = await api.get(`/movies/${id}`);
+      return data.movie;
+    } catch {
+      const matches = similarLocal(id, 8);
+      const found = matches[0] || (await fetchMovies()).movies[0];
+      return {
+        ...found,
+        status: 'Released',
+        director: (found as any).director ?? null,
+        cast: [],
+        similar: matches,
+      };
+    }
   }
 }
 
-// ── Trending ──────────────────────────────────────────────────────
+// ── Trending (Live TMDB) ──────────────────────────────────────────
 export async function fetchTrending(window: 'day' | 'week' = 'week'): Promise<Movie[]> {
   try {
-    const { data } = await api.get('/trending', { params: { window } });
-    return data.movies ?? [];
+    return await fetchLiveTrending(window);
   } catch {
-    return recommendLocal('', 20);
+    try {
+      const { data } = await api.get('/trending', { params: { window } });
+      return data.movies ?? [];
+    } catch {
+      return recommendLocal('', 20);
+    }
   }
 }
 
-// ── Search ────────────────────────────────────────────────────────
+// ── Search (Live TMDB) ────────────────────────────────────────────
 export async function searchMovies(
   query: string,
   page = 1
 ): Promise<{ movies: Movie[]; totalPages: number; totalResults: number }> {
   try {
-    const { data } = await api.get('/search', { params: { q: query, page } });
-    return {
-      movies: data.movies ?? [],
-      totalPages: data.totalPages ?? 1,
-      totalResults: data.totalResults ?? 0,
-    };
+    return await searchLiveMovies(query, page);
   } catch {
-    const results = recommendLocal(query, 20);
-    return {
-      movies: results,
-      totalPages: 1,
-      totalResults: results.length,
-    };
+    try {
+      const { data } = await api.get('/search', { params: { q: query, page } });
+      return {
+        movies: data.movies ?? [],
+        totalPages: data.totalPages ?? 1,
+        totalResults: data.totalResults ?? 0,
+      };
+    } catch {
+      const results = recommendLocal(query, 20);
+      return {
+        movies: results,
+        totalPages: 1,
+        totalResults: results.length,
+      };
+    }
   }
 }
 
@@ -77,35 +101,43 @@ export async function discoverMovies(params: {
   page?: number;
 }): Promise<{ movies: Movie[]; totalPages: number }> {
   try {
-    const { data } = await api.get('/search/discover', { params });
-    return { movies: data.movies ?? [], totalPages: data.totalPages ?? 1 };
+    return await discoverLiveMovies(params);
   } catch {
-    const results = recommendLocal('', 40);
-    let filtered = results;
-    if (params.type && params.type !== 'all') {
-      filtered = filtered.filter((m) => (m.mediaType || 'movie') === params.type);
+    try {
+      const { data } = await api.get('/search/discover', { params });
+      return { movies: data.movies ?? [], totalPages: data.totalPages ?? 1 };
+    } catch {
+      const results = recommendLocal('', 40);
+      let filtered = results;
+      if (params.type && params.type !== 'all') {
+        filtered = filtered.filter((m) => (m.mediaType || 'movie') === params.type);
+      }
+      return { movies: filtered.slice(0, 20), totalPages: 1 };
     }
-    return { movies: filtered.slice(0, 20), totalPages: 1 };
   }
 }
 
-// ── Genres ────────────────────────────────────────────────────────
+// ── Genres (Live TMDB) ────────────────────────────────────────────
 export async function fetchGenres(): Promise<Genre[]> {
   try {
-    const { data } = await api.get('/genres');
-    return data.genres ?? [];
+    return await fetchLiveGenres();
   } catch {
-    return [
-      { id: 28, name: 'Action' },
-      { id: 12, name: 'Adventure' },
-      { id: 16, name: 'Animation' },
-      { id: 35, name: 'Comedy' },
-      { id: 80, name: 'Crime' },
-      { id: 18, name: 'Drama' },
-      { id: 14, name: 'Fantasy' },
-      { id: 878, name: 'Science Fiction' },
-      { id: 53, name: 'Thriller' },
-    ];
+    try {
+      const { data } = await api.get('/genres');
+      return data.genres ?? [];
+    } catch {
+      return [
+        { id: 28, name: 'Action' },
+        { id: 12, name: 'Adventure' },
+        { id: 16, name: 'Animation' },
+        { id: 35, name: 'Comedy' },
+        { id: 80, name: 'Crime' },
+        { id: 18, name: 'Drama' },
+        { id: 14, name: 'Fantasy' },
+        { id: 878, name: 'Science Fiction' },
+        { id: 53, name: 'Thriller' },
+      ];
+    }
   }
 }
 
