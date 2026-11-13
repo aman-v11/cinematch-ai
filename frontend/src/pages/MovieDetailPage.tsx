@@ -26,7 +26,12 @@ export default function MovieDetailPage() {
 
   const { data: movie, isLoading, error } = useQuery({
     queryKey: ['movie', movieId],
-    queryFn: () => fetchMovieDetail(movieId),
+    queryFn: () => {
+      // Check query params if mediaType was passed, e.g. /movie/1399?type=tv
+      const params = new URLSearchParams(window.location.search);
+      const type = params.get('type') as 'movie' | 'tv' | null;
+      return fetchMovieDetail(movieId, type || undefined);
+    },
     enabled: !isNaN(movieId) && movieId > 0,
     staleTime: 10 * 60 * 1000,
   });

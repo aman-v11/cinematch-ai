@@ -72,10 +72,10 @@ export default function MovieCard({ movie, size = 'md', showOverlay = true, matc
         position: 'relative',
         userSelect: 'none',
       }}
-      onClick={() => navigate(`/movie/${movie.id}`)}
+      onClick={() => navigate(movie.mediaType === 'tv' ? `/movie/${movie.id}?type=tv` : `/movie/${movie.id}`)}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && navigate(`/movie/${movie.id}`)}
+      onKeyDown={(e) => e.key === 'Enter' && navigate(movie.mediaType === 'tv' ? `/movie/${movie.id}?type=tv` : `/movie/${movie.id}`)}
       aria-label={`View details for ${movie.title}`}
     >
       {/* Poster */}

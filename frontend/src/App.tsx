@@ -116,7 +116,6 @@ export default function App() {
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)' }}>
           <ScrollToTop />
           <Navbar />
-          <DataSourceBanner />
           <main style={{ flex: 1 }}>
             <Suspense fallback={<PageLoader />}>
               <Routes>

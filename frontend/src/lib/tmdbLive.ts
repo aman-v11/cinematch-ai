@@ -118,13 +118,38 @@ export async function discoverLiveMovies(params: {
   };
 }
 
-export async function fetchLiveMovieDetail(id: number, mediaType: 'movie' | 'tv' = 'movie'): Promise<MovieDetail> {
-  const endpoint = mediaType === 'tv' ? `/tv/${id}` : `/movie/${id}`;
-  const { data } = await tmdbClient.get(endpoint, {
-    params: { append_to_response: 'credits,similar,videos' },
-  });
+export async function fetchLiveMovieDetail(id: number, preferredType?: 'movie' | 'tv'): Promise<MovieDetail> {
+  let data: any;
+  let resolvedType: 'movie' | 'tv' = preferredType || 'movie';
 
-  const base = mapMovie(data, mediaType);
+  // If type wasn't explicitly specified, try movie first, then tv if 404
+  if (preferredType) {
+    const endpoint = preferredType === 'tv' ? `/tv/${id}` : `/movie/${id}`;
+    const res = await tmdbClient.get(endpoint, {
+      params: { append_to_response: 'credits,similar,videos' },
+    });
+    data = res.data;
+  } else {
+    try {
+      const res = await tmdbClient.get(`/movie/${id}`, {
+        params: { append_to_response: 'credits,similar,videos' },
+      });
+      data = res.data;
+      resolvedType = 'movie';
+    } catch (movieErr: any) {
+      if (movieErr?.response?.status === 404) {
+        const res = await tmdbClient.get(`/tv/${id}`, {
+          params: { append_to_response: 'credits,similar,videos' },
+        });
+        data = res.data;
+        resolvedType = 'tv';
+      } else {
+        throw movieErr;
+      }
+    }
+  }
+
+  const base = mapMovie(data, resolvedType);
   const credits = data.credits || {};
   const cast = (credits.cast || []).slice(0, 10).map((c: any) => ({
     id: c.id,
@@ -137,7 +162,7 @@ export async function fetchLiveMovieDetail(id: number, mediaType: 'movie' | 'tv'
   const director = crew.find((c: any) => c.job === 'Director')?.name || null;
 
   const similar = (data.similar?.results || []).slice(0, 8).map((m: any) => ({
-    ...mapMovie(m, mediaType),
+    ...mapMovie(m, resolvedType),
     score: m.vote_average ? Number((m.vote_average / 10).toFixed(2)) : 0.8,
     explanation: `Shares cinematic DNA with ${base.title}.`,
   }));
