@@ -27,24 +27,40 @@ function profileUrl(path: string | null): string | null {
   return path ? `${TMDB_IMAGE_BASE}/w185${path}` : null;
 }
 
+import rawCatalog from '../../../data/movies.json';
+
+const catalogPosterMap = new Map<string, { posterUrl: string | null; backdropUrl: string | null }>();
+for (const entry of (rawCatalog as any[])) {
+  if (entry.title) {
+    catalogPosterMap.set(entry.title.toLowerCase().trim(), {
+      posterUrl: entry.posterUrl || null,
+      backdropUrl: entry.backdropUrl || null,
+    });
+  }
+}
+
 function mapMovie(m: any, defaultType: 'movie' | 'tv' = 'movie'): Movie {
   const isTv = m.media_type === 'tv' || defaultType === 'tv' || Boolean(m.first_air_date && !m.release_date);
   const releaseDate = m.release_date || m.first_air_date || '';
   const title = m.title || m.name || 'Untitled';
   const year = releaseDate ? parseInt(releaseDate.split('-')[0], 10) || null : null;
 
+  const fallback = catalogPosterMap.get(title.toLowerCase().trim());
+  const resolvedPoster = posterUrl(m.poster_path) || m.posterUrl || fallback?.posterUrl || null;
+  const resolvedBackdrop = backdropUrl(m.backdrop_path) || m.backdropUrl || fallback?.backdropUrl || null;
+
   return {
     id: m.id,
     title,
     overview: m.overview || '',
-    posterUrl: posterUrl(m.poster_path),
-    backdropUrl: backdropUrl(m.backdrop_path),
+    posterUrl: resolvedPoster,
+    backdropUrl: resolvedBackdrop,
     releaseDate,
     releaseYear: year,
-    rating: m.vote_average ? Number(m.vote_average.toFixed(1)) : 0,
-    voteCount: m.vote_count || 0,
+    rating: m.vote_average ? Number(m.vote_average.toFixed(1)) : (m.rating || 0),
+    voteCount: m.vote_count || m.voteCount || 0,
     genres: [],
-    genreIds: m.genre_ids || [],
+    genreIds: m.genre_ids || m.genreIds || [],
     runtime: m.runtime || null,
     tagline: m.tagline || null,
     popularity: m.popularity || 0,

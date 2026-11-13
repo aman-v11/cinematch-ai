@@ -644,6 +644,26 @@ export default function HomePage() {
 
         {/* ── MAIN CONTENT CONTAINER ──────────────────────────── */}
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 20px 80px' }}>
+          {/* ── Trending This Week (Elevated to top) ───────────── */}
+          <Section
+            title="Trending This Week"
+            subtitle="The most talked about movies and series right now"
+            icon={<TrendingUp size={20} style={{ color: 'var(--accent-light)' }} />}
+            linkTo="/trending"
+          >
+            {trendingLoading ? (
+              <MovieRowSkeleton />
+            ) : trendingError || !trending?.length ? (
+              <p style={{ color: 'var(--text-secondary)' }}>Could not load trending right now.</p>
+            ) : (
+              <div className="scroll-row no-scrollbar">
+                {trending.map((m) => (
+                  <MovieCard key={m.id} movie={m} />
+                ))}
+              </div>
+            )}
+          </Section>
+
           {/* ── Recently Viewed Section (if any) ──────────────── */}
           {recentMovies.length > 0 && (
             <Section
@@ -671,44 +691,6 @@ export default function HomePage() {
               </div>
             </Section>
           )}
-
-          {/* ── TOP RATED WEB SERIES & TV SHELF ──────────────── */}
-          <Section
-            title="Top Rated Web Series"
-            subtitle="Acclaimed television and episodic masterpieces"
-            icon={<Tv size={20} style={{ color: '#60a5fa' }} />}
-            linkTo="/discover?type=tv"
-          >
-            {webSeriesLoading ? (
-              <MovieRowSkeleton />
-            ) : !webSeries?.movies?.length ? null : (
-              <div className="scroll-row no-scrollbar">
-                {webSeries.movies.slice(0, 15).map((s) => (
-                  <MovieCard key={s.id} movie={s} />
-                ))}
-              </div>
-            )}
-          </Section>
-
-          {/* ── Trending This Week ────────────────────────────── */}
-          <Section
-            title="Trending This Week"
-            subtitle="The most talked about movies and series right now"
-            icon={<TrendingUp size={20} style={{ color: 'var(--accent-light)' }} />}
-            linkTo="/trending"
-          >
-            {trendingLoading ? (
-              <MovieRowSkeleton />
-            ) : trendingError || !trending?.length ? (
-              <p style={{ color: 'var(--text-secondary)' }}>Could not load trending right now.</p>
-            ) : (
-              <div className="scroll-row no-scrollbar">
-                {trending.map((m) => (
-                  <MovieCard key={m.id} movie={m} />
-                ))}
-              </div>
-            )}
-          </Section>
 
           {/* ── Popular Movies ────────────────────────────────── */}
           <Section
@@ -775,6 +757,24 @@ export default function HomePage() {
               <div className="scroll-row no-scrollbar">
                 {topRated?.movies.map((m) => (
                   <MovieCard key={m.id} movie={m} />
+                ))}
+              </div>
+            )}
+          </Section>
+
+          {/* ── TOP RATED WEB SERIES & TV SHELF (Below Top Rated Movies) ──────────────── */}
+          <Section
+            title="Top Rated Web Series"
+            subtitle="Acclaimed television and episodic masterpieces"
+            icon={<Tv size={20} style={{ color: '#60a5fa' }} />}
+            linkTo="/discover?type=tv"
+          >
+            {webSeriesLoading ? (
+              <MovieRowSkeleton />
+            ) : !webSeries?.movies?.length ? null : (
+              <div className="scroll-row no-scrollbar">
+                {webSeries.movies.slice(0, 15).map((s) => (
+                  <MovieCard key={s.id} movie={s} />
                 ))}
               </div>
             )}
