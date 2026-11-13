@@ -52,14 +52,23 @@ Phase 0 complete. First implementation milestone complete: **local catalog fallb
 - [x] Verified backend TypeScript compilation (`npm run build`)
 - [x] Configured Python 3.14 virtual environment with compatible wheels (`pydantic>=2.14.0`, `fastapi`, `scikit-learn`, `uvicorn`)
 - [x] Executed full pytest suite in `ai-service/tests` (7 passed)
-- [x] Real high-resolution posters & backdrops integrated for all 72 movies in the local catalog (`data/movies.json`)
-- [x] Backend `catalog.ts` wired to return `posterUrl` and `backdropUrl`
-- [x] Added `referrerPolicy="no-referrer"` in `index.html` and image components to prevent CDN hotlinking blocks
-- [x] Implemented real-time cross-component sync for Watchlist and Likes via CustomEvents
-- [x] Polished `WatchlistPage` UI (clean responsive grid, instant removal sync, clear-all action)
-- [x] Added resilient error & empty state handling for `TrendingPage`
-- [x] Built full `ProfilePage` (taste breakdown, genre distribution, AI jump link, JSON export, local storage management)
-- [x] Watchlist batch fetch, data-source banner, home error state, grid CSS fix, TMDB attribution
+- [x] Real high-resolution posters & backdrops integrated for all movies in local catalog
+- [x] Built interactive Toast Notification system (`Toast.tsx`) with animated entry/exit
+- [x] Added `framer-motion` page transition animations (`PageTransition.tsx`)
+- [x] Route-level code splitting with `React.lazy()` and `Suspense` for all 7 routes
+- [x] Scroll restoration (`ScrollToTop.tsx`) across route navigations
+- [x] In-memory cache for $O(1)$ Watchlist & Liked checks with automatic cross-component sync
+- [x] "Recently Viewed" movies tracking with local persistence and homepage display
+- [x] User personal 1-10 numerical / star rating system on `MovieDetailPage` and `ProfilePage`
+- [x] YouTube trailer search integration & share movie link with toast feedback
+- [x] Rich loading skeletons (`MovieDetailSkeleton`)
+- [x] AI chat history persistence across sessions with "New Conversation" action
+- [x] AI recommendation refinement chips (+ Match % score badge on cards)
+- [x] Discover page full URL query parameter synchronization (`q`, `genre`, `year`, `min_rating`, `sort_by`, `page`)
+- [x] Library JSON import & export on `ProfilePage` with custom username editing
+- [x] Cleaned dead Vite CSS and optimized Google Fonts loading in `index.html`
+- [x] Cinematic global Footer (`Footer.tsx`) with Back to Top button
+- [x] Themed 404 Scene Not Found page
 
 ---
 

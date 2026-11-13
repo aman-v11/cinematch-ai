@@ -37,10 +37,51 @@ export function MovieRowSkeleton({ count = 8 }: { count?: number }) {
 export function HeroSkeleton() {
   return (
     <div style={{ minHeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ textAlign: 'center' }}>
-        <div className="skeleton" style={{ width: 300, height: 40, borderRadius: 8, margin: '0 auto 16px' }} />
-        <div className="skeleton" style={{ width: 500, height: 20, borderRadius: 4, margin: '0 auto 8px' }} />
-        <div className="skeleton" style={{ width: 400, height: 20, borderRadius: 4, margin: '0 auto' }} />
+      <div style={{ textAlign: 'center', width: '100%', maxWidth: 600, padding: 20 }}>
+        <div className="skeleton" style={{ width: 280, height: 36, borderRadius: 8, margin: '0 auto 16px' }} />
+        <div className="skeleton" style={{ width: '80%', height: 20, borderRadius: 4, margin: '0 auto 8px' }} />
+        <div className="skeleton" style={{ width: '60%', height: 20, borderRadius: 4, margin: '0 auto' }} />
+      </div>
+    </div>
+  );
+}
+
+export function MovieDetailSkeleton() {
+  return (
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 20px 80px' }}>
+      {/* Backdrop skeleton */}
+      <div
+        className="skeleton"
+        style={{
+          width: '100%',
+          height: 380,
+          borderRadius: 20,
+          marginBottom: 32,
+        }}
+      />
+      {/* Detail info skeleton */}
+      <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+        <div
+          className="skeleton"
+          style={{
+            width: 240,
+            aspectRatio: '2/3',
+            borderRadius: 16,
+            flexShrink: 0,
+          }}
+        />
+        <div style={{ flex: 1, minWidth: 280 }}>
+          <div className="skeleton" style={{ height: 36, width: '60%', borderRadius: 8, marginBottom: 12 }} />
+          <div className="skeleton" style={{ height: 18, width: '40%', borderRadius: 6, marginBottom: 20 }} />
+          <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
+            <div className="skeleton" style={{ height: 28, width: 80, borderRadius: 14 }} />
+            <div className="skeleton" style={{ height: 28, width: 80, borderRadius: 14 }} />
+            <div className="skeleton" style={{ height: 28, width: 80, borderRadius: 14 }} />
+          </div>
+          <div className="skeleton" style={{ height: 14, width: '100%', borderRadius: 4, marginBottom: 8 }} />
+          <div className="skeleton" style={{ height: 14, width: '90%', borderRadius: 4, marginBottom: 8 }} />
+          <div className="skeleton" style={{ height: 14, width: '75%', borderRadius: 4 }} />
+        </div>
       </div>
     </div>
   );

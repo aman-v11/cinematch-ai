@@ -42,6 +42,7 @@ export async function discoverMovies(params: {
   year?: number;
   minRating?: number;
   sortBy?: string;
+  type?: string;
   page?: number;
 }): Promise<{ movies: Movie[]; totalPages: number }> {
   const { data } = await api.get('/search/discover', { params });

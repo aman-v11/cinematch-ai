@@ -19,9 +19,32 @@ interface CatalogRecord {
   keywords: string[];
   posterUrl?: string | null;
   backdropUrl?: string | null;
+  mediaType?: 'movie' | 'tv';
 }
 
 let cache: CatalogRecord[] | null = null;
+let actorsMap: Record<string, string | null> | null = null;
+
+function getActorImage(name: string): string | null {
+  if (!actorsMap) {
+    const candidates = [
+      path.join(__dirname, '../../../data/actors.json'),
+      path.join(process.cwd(), '../data/actors.json'),
+      path.join(process.cwd(), 'data/actors.json'),
+    ];
+    const found = candidates.find((p) => fs.existsSync(p));
+    if (found) {
+      try {
+        actorsMap = JSON.parse(fs.readFileSync(found, 'utf-8'));
+      } catch {
+        actorsMap = {};
+      }
+    } else {
+      actorsMap = {};
+    }
+  }
+  return actorsMap?.[name] ?? null;
+}
 
 function catalogPath(): string {
   const candidates = [
@@ -65,6 +88,7 @@ function toMovie(m: CatalogRecord): Movie {
     runtime: m.runtime ?? null,
     tagline: m.tagline ?? null,
     popularity: m.popularity ?? 0,
+    mediaType: m.mediaType ?? 'movie',
   };
 }
 
@@ -137,7 +161,7 @@ export async function getMovieDetail(id: number): Promise<MovieDetail> {
       id: record.id * 100 + index,
       name,
       character: '',
-      profileUrl: null,
+      profileUrl: getActorImage(name),
     })),
     director: record.director ?? null,
     similar: similarFor(record),
@@ -178,8 +202,12 @@ export async function discoverMovies(params: {
   year?: number;
   minRating?: number;
   sortBy?: string;
+  type?: string;
 }): Promise<{ movies: Movie[]; totalPages: number }> {
   let items = [...loadCatalog()];
+  if (params.type && params.type !== 'all') {
+    items = items.filter((m) => (m.mediaType ?? 'movie') === params.type);
+  }
   if (params.genres) {
     const wanted = params.genres.split(',').map((g) => parseInt(g, 10)).filter((n) => !Number.isNaN(n));
     if (wanted.length) items = items.filter((m) => wanted.some((id) => m.genreIds.includes(id)));

@@ -81,6 +81,7 @@ export async function discoverMovies(params: {
   year?: number;
   minRating?: number;
   sortBy?: string;
+  type?: string;
 }): Promise<{ movies: Movie[]; totalPages: number }> {
   return source().discoverMovies(params);
 }

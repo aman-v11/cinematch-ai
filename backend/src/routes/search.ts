@@ -21,10 +21,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/search/discover?genres=28,12&year=2023&minRating=7&sortBy=popularity.desc&page=1
+// GET /api/search/discover?genres=28,12&year=2023&minRating=7&sortBy=popularity.desc&type=tv&page=1
 router.get('/discover', async (req, res) => {
   try {
-    const { genres, year, minRating, sortBy, page = '1' } = req.query;
+    const { genres, year, minRating, sortBy, type, page = '1' } = req.query;
 
     const result = await discoverMovies({
       page: parseInt(page as string, 10) || 1,
@@ -32,6 +32,7 @@ router.get('/discover', async (req, res) => {
       year: year ? parseInt(year as string, 10) : undefined,
       minRating: minRating ? parseFloat(minRating as string) : undefined,
       sortBy: sortBy as string | undefined,
+      type: type as string | undefined,
     });
 
     res.json({ success: true, ...result });

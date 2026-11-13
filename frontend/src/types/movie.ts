@@ -14,6 +14,7 @@ export interface Movie {
   runtime: number | null;
   tagline: string | null;
   popularity: number;
+  mediaType?: 'movie' | 'tv';
 }
 
 export interface MovieDetail extends Movie {
