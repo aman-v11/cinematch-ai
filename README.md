@@ -22,48 +22,6 @@ An AI-powered movie discovery and recommendation platform. Find your perfect mov
 | Database | PostgreSQL + pgvector (Phase 6) |
 | Data | TMDB API |
 
-## Quick Start
-
-The app runs **without a TMDB key** using the local catalog in `data/movies.json` (real film metadata, no posters). Add a TMDB key for live artwork and a much larger library.
-
-### Prerequisites
-- Node.js 18+
-- Python 3.10+
-- Optional: a free TMDB API key from [themoviedb.org](https://www.themoviedb.org/settings/api)
-
-### 1. Backend
-
-```bash
-cd backend
-npm install
-cp .env.example .env
-# Optional: copy .env.example to .env and add TMDB_API_KEY
-npm run dev
-```
-
-Backend starts at **http://localhost:3001**
-
-### 2. Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Frontend starts at **http://localhost:5173**
-
-### 3. AI Service
-
-```bash
-cd ai-service
-python -m venv .venv
-.venv\Scripts\activate   # Windows
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
-```
-
-AI service starts at **http://localhost:8000**
 
 ## Environment Variables
 
